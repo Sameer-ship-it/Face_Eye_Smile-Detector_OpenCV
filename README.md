@@ -1,61 +1,54 @@
 # Real-Time Face, Eye, and Smile Detection
 
-A small Python computer-vision demo that detects faces, eyes, and smiles in webcam frames using OpenCV Haar cascade classifiers.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![OpenCV](https://img.shields.io/badge/Computer%20vision-OpenCV-5C3EE8?logo=opencv&logoColor=white)
+![Project type](https://img.shields.io/badge/Status-Learning%20demo-informational)
 
-## Features
+A webcam-based computer-vision demo using OpenCV Haar cascades to detect faces and inspect each detected face region for eyes and smiles.
 
-- Live webcam capture
-- Face detection with eye and smile detection within each face
-- Included Haar cascade XML files
-- A separate face-detection example
+## Detection flow
 
-## Repository layout
-
-```text
-Face&ObjectDetection/
-├── FaceDetector.py
-├── Face_Eye_Smile_detector.py
-├── haarcascade_frontalface_default.xml
-└── haarcascade_smile.xml
+```mermaid
+flowchart LR
+    A[Webcam frame] --> B[Convert to grayscale]
+    B --> C[Detect faces]
+    C --> D[Inspect each face region]
+    D --> E[Detect eyes and smiles]
+    E --> F[Draw labels on frame]
 ```
+
+## Included examples
+
+| Script | Description |
+| --- | --- |
+| [FaceDetector.py](Face%26ObjectDetection/FaceDetector.py) | Face detection with a live camera preview |
+| [Face_Eye_Smile_detector.py](Face%26ObjectDetection/Face_Eye_Smile_detector.py) | Face, eye, and smile detection in a live preview |
+
+Both scripts use Haar cascade XML files bundled with the installed OpenCV Python package, so they do not depend on a machine-specific cascade path or the partial `EyeDetect.crdownload` file in the repository.
 
 ## Run locally
 
-```bash
-git clone https://github.com/Sameer-ship-it/Face_Eye_Smile-Detector_OpenCV.git
-cd Face_Eye_Smile-Detector_OpenCV
+Install OpenCV in a virtual environment:
+
+```powershell
 python -m venv .venv
-```
-
-Activate the environment and install OpenCV:
-
-```bash
-# Windows PowerShell
 .venv\Scripts\Activate.ps1
-# macOS / Linux
-source .venv/bin/activate
-```
-
-```bash
 python -m pip install opencv-python
-python Face&ObjectDetection/Face_Eye_Smile_detector.py
 ```
 
-The scripts need a working webcam. Press `q` in the video window to exit. If the cascade files cannot be found, run the script from the `Face&ObjectDetection` directory:
+On macOS or Linux, activate with `source .venv/bin/activate`.
 
-```bash
-cd Face&ObjectDetection
-python Face_Eye_Smile_detector.py
+From the repository root, run either example:
+
+```powershell
+python ".\Face&ObjectDetection\FaceDetector.py"
+python ".\Face&ObjectDetection\Face_Eye_Smile_detector.py"
 ```
 
-## How it works
+Allow the application to use the default camera. Press **q** in the preview window to quit. A desktop display is required for the OpenCV window.
 
-Each frame is converted to grayscale, then passed through the included Haar cascades. The face detector identifies regions of interest; the eye and smile detectors run within those regions. Results are drawn on the live frame.
+## Limitations and privacy
 
-## Scope and limitations
-
-Haar cascades are lightweight classical detectors. Results vary with lighting, camera quality, pose, and face orientation; this is a demonstration rather than a biometric or identity system.
-
-## Author
-
-[Sameer Raza](https://github.com/Sameer-ship-it)
+- Haar-cascade detections are heuristic and may produce false positives or miss faces, eyes, and smiles under different lighting or camera conditions.
+- This demo does not identify people and is not an identity-verification system.
+- Frames are processed locally by the scripts and are not saved by this code.
