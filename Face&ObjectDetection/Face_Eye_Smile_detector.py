@@ -1,37 +1,56 @@
+"""Detect faces, eyes, and smiles from the default webcam using Haar cascades."""
+
 import cv2
 
-face_cascade = cv2.CascadeClassifier(r"C:\Users\shima\OneDrive\Desktop\OpenCv\Face&ObjectDetection\haarcascade_frontalface_default.xml")
-smile_cascade = cv2.CascadeClassifier(r"C:\Users\shima\OneDrive\Desktop\OpenCv\Face&ObjectDetection\haarcascade_smile.xml")
-eye_cascade = cv2.CascadeClassifier(r"C:\Users\shima\OneDrive\Desktop\OpenCv\Face&ObjectDetection\EyeDetect.crdownload")
 
-cap = cv2.VideoCapture(0)
+def load_cascade(filename):
+    path = cv2.data.haarcascades + filename
+    classifier = cv2.CascadeClassifier(path)
+    if classifier.empty():
+        raise FileNotFoundError(f"Could not load OpenCV cascade: {path}")
+    return classifier
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.1, 5)
+def main():
+    face_cascade = load_cascade("haarcascade_frontalface_default.xml")
+    eye_cascade = load_cascade("haarcascade_eye.xml")
+    smile_cascade = load_cascade("haarcascade_smile.xml")
 
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    camera = cv2.VideoCapture(0)
+    if not camera.isOpened():
+        camera.release()
+        raise RuntimeError("Could not open the default camera (device 0).")
 
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_color = frame[y:y+h, x:x+w]
+    try:
+        while True:
+            ok, frame = camera.read()
+            if not ok:
+                break
 
-        eyes = eye_cascade.detectMultiScale(roi_gray, 1.1, 10)
-        if len(eyes) > 0:
-            cv2.putText(frame, "Eyes Detected", (x, y-30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 1)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
 
-        smiles = smile_cascade.detectMultiScale(roi_gray, 1.7, 20)
-        if len(smiles) > 0:
-            cv2.putText(frame, "Smiling", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,0 ,0), 1)
+            for (x, y, width, height) in faces:
+                face_gray = gray[y:y + height, x:x + width]
+                cv2.rectangle(frame, (x, y), (x + width, y + height), (0, 255, 0), 2)
 
-    cv2.imshow("Smart Face Detector", frame)
+                eyes = eye_cascade.detectMultiScale(face_gray, scaleFactor=1.1, minNeighbors=10)
+                smiles = smile_cascade.detectMultiScale(face_gray, scaleFactor=1.7, minNeighbors=20)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+                if len(eyes) > 0:
+                    cv2.putText(frame, "Eyes detected", (x, max(y - 30, 20)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 1)
+                if len(smiles) > 0:
+                    cv2.putText(frame, "Smile detected", (x, max(y - 10, 20)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 1)
 
-cap.release()
-cv2.destroyAllWindows()
+            cv2.imshow("Face, Eye, and Smile Detection", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+    finally:
+        camera.release()
+        cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
